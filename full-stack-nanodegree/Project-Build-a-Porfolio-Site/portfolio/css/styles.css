@@ -1,0 +1,21 @@
+* {
+	font-family: 'Lato', sans-serif;
+	font-weight: 300;
+	color: #747704;
+}
+.text-muted {
+	color: #bcbbbb;
+}
+.text-thin {
+	font-weight: 100;
+}
+
+.logo {
+	margin-top: 20px;
+}
+
+#header {
+	border-bottom: 2px solid #bcbbbb;
+	padding-bottom: 5px;
+	margin-bottom: 10px;
+}
