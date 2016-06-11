@@ -1,6 +1,6 @@
 **Table of Contents** 
 
-- [PROJECT 2](#project-2)
+- [PROJECT 4](#project-4)
 	- [Tournament Results](#tournament-results)
 		- [Description](#description)
 		- [What is Included](#what-is-included)
@@ -9,14 +9,14 @@
 		- [Footnotes](#footnotes)
 
 
-# **PROJECT 2**
+# **PROJECT 4**
 ## Tournament Results
 
 ### Description
 
-Project 2 is  a database schema to store the game matches between players 
-and query this data and determine the winners of various games.
-for the purpose of meeting UDACITY Full Stack web Developer Project 2
+Project 4 is  a database schema to store the game matches between players 
+and query this data to establish standing and the next set of matches in a series.
+for the purpose of meeting UDACITY Full Stack web Developer Project 4
 
 ### What is Included
 

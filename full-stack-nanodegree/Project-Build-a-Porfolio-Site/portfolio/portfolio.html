@@ -4,107 +4,121 @@
 	Portfolio website
 -->
 <html lang="en">
-	<head>
-		<meta charset="utf-8"/>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-		<meta name="viewport" content="width=device-width, intial-scale=1"/>
-		<meta name="author" content="Aron Roberts"/>
-		<meta name="description" content="Portfolio of projects completed in Full-Stack Nanodegree at Udacity"/>
-		<title>Portfolio</title>
-		<link rel="stylesheet" href="css/bootstrap.min.css"/>
-		<link rel="stylesheet" href="css/styles.css"/>
-		<link href='https://fonts.googleapis.com/css?family=Lato:300,100' rel='stylesheet'/>
-		<script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
-		<script type="text/javascript" src="js/bootstrap.min.js"></script>
-	</head>
-	<body>
+
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, intial-scale=1" />
+	<meta name="author" content="Aron Roberts" />
+	<meta name="description" content="Portfolio of projects completed in Full-Stack Nanodegree at Udacity" />
+	<title>Portfolio</title>
+	<link rel="stylesheet" href="css/bootstrap.min.css" />
+	<link rel="stylesheet" href="css/styles.css" />
+	<link href='https://fonts.googleapis.com/css?family=Lato:300,100' rel='stylesheet' />
+	<script type="text/javascript" src="js/jquery-1.12.4.min.js" defer></script>
+	<script type="text/javascript" src="js/bootstrap.min.js" defer></script>
+</head>
+
+<body>
 	<div class="container">
 		<header class="row" id="header">
-			<div class="col-md-2"><img src="images/logo.jpg" class="img-responsive logo" alt="R - logo"/></div>
-			<div class="col-md-10 text-right text-uppercase"><h1 class="text-thin">Aron Roberts</h1><h4>Full-Stack Engineer</h4></div>
+			<div class="col-md-2">
+				<img src="images/logo.jpg" class="img-responsive logo" alt="R - logo" />
+			</div>
+			<div class="col-md-10 text-right text-uppercase">
+				<h1 class="text-thin">Aron Roberts</h1>
+				<h4>Full-Stack Engineer</h4>
+			</div>
 		</header>
 		<div class="row">
-			<div class="col-md-12"><img src="images/banner.jpg" class="img-responsive" alt="code on monitor"/></div>
+			<div class="col-md-12">
+				<img src="images/banner.jpg" class="img-responsive" alt="code on monitor" />
+			</div>
 		</div>
 		<section id="projects">
 			<div class="row">
-				<div class="col-md-12"><h2 class="text-muted">Featured Work</h2></div>
+				<div class="col-md-12">
+					<h2 class="text-muted">Featured Work</h2>
+				</div>
 			</div>
 			<div class="row text-center">
-				<div class ="col-md-4">
-					<img src="images/movie-trailer-project.jpg" class="img-responsive" alt="Movie Trailers" data-toggle="modal" data-target="#project1"/>
+				<div class="col-md-4">
+					<img src="images/movie-trailer-project.jpg" class="img-responsive" alt="Movie Trailers" data-toggle="modal" data-target="#project1" />
 					<h3>Movie Trailer Website</h3>
 					<a href="https://github.com/robotros/UDACITY/tree/master/full-stack-nanodegree/Project-Movie-Trailer-Website">http://github.com/</a>
 				</div>
-				<div class ="col-md-4">
-					<img src="images/portfolio.jpg" class="img-responsive" alt="portfolio" data-toggle="modal" data-target="#project2"/>
+				<div class="col-md-4">
+					<img src="images/portfolio.jpg" class="img-responsive" alt="portfolio" data-toggle="modal" data-target="#project2" />
 					<h3>Project Portfolio</h3>
 					<a href="https://github.com/robotros/UDACITY/tree/master/full-stack-nanodegree/Project-Build-a-Porfolio-Site">http://github.com/</a>
 				</div>
-				<div class ="col-md-4">
-					<img src="images/tournament.jpg" class="img-responsive" alt="chess match" data-toggle="modal" data-target="#project3"/>
+				<div class="col-md-4">
+					<img src="images/tournament.jpg" class="img-responsive" alt="chess match" data-toggle="modal" data-target="#project3" />
 					<h3>Tournament Results</h3>
 					<a href="https://github.com/robotros/UDACITY/tree/master/full-stack-nanodegree/Project-Tournament-Results" target="_blank">http://github.com/</a>
 				</div>
 			</div>
 		</section>
-		<footer class="row" id="footer"><p>2016 Aron Roberts</p></footer>
+		<footer class="row" id="footer">
+			<p>2016 Aron Roberts</p>
+		</footer>
 	</div>
 
 	<!-- Movie website modal -->
-	<div class="modal fade" id="project1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal fade" id="project1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
 		<div class="modal-dialog">
-	     	<div class="modal-content">
-	       	    <div class="modal-header">
-	                <h4 class="modal-title" id="myModalLabel">Movie Trailer Website</h4>
-	          	</div>
-	       		<div class="modal-body">
-	                <img src="images/movie-trailer-project.jpg" class="img-responsive" alt="Movie Trailers">
-	                <h5 class="text-uppercase">Description</h5>
-	                <p>Dynamic movie trailer website themed around Star Wars</p>
-	       	    </div>
-	           	<div class="modal-footer">
-	        		<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	    	    </div>
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="myModalLabel">Movie Trailer Website</h4>
+				</div>
+				<div class="modal-body">
+					<img src="images/movie-trailer-project.jpg" class="img-responsive" alt="Movie Trailers">
+					<h5 class="text-uppercase">Description</h5>
+					<p>Dynamic movie trailer website themed around Star Wars</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
 			</div>
-	  	</div>
+		</div>
 	</div>
 
-		<!-- portfolio modal -->
-	<div class="modal fade" id="project2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<!-- portfolio modal -->
+	<div class="modal fade" id="project2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2" aria-hidden="true">
 		<div class="modal-dialog">
-	     	<div class="modal-content">
-	       	    <div class="modal-header">
-	                <h4 class="modal-title" id="myModalLabel">Project Portfolio</h4>
-	          	</div>
-	       		<div class="modal-body">
-	                <img src="images/portfolio.jpg" class="img-responsive" alt="portfolio">
-	                <p>Portfolio of Udacity projects</p>
-	       	    </div>
-	           	<div class="modal-footer">
-	        		<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	    	    </div>
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="myModalLabel3">Project Portfolio</h4>
+				</div>
+				<div class="modal-body">
+					<img src="images/portfolio.jpg" class="img-responsive" alt="portfolio">
+					<p>Portfolio of Udacity projects</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
 			</div>
-	  	</div>
+		</div>
 	</div>
 
-		<!-- tournamnet modal -->
+	<!-- tournamnet modal -->
 	<div class="modal fade" id="project3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
-	     	<div class="modal-content">
-	       	    <div class="modal-header">
-	                <h4 class="modal-title" id="myModalLabel">Tournament Results</h4>
-	          	</div>
-	       		<div class="modal-body">
-	                <img src="images/tournament.jpg" class="img-responsive" alt="chess match">
-	                <h5 class="text-uppercase">Description</h5>
-	                <p> A database schema to store the game matches between players and query this data to determine the order of matches</p>
-	       	    </div>
-	           	<div class="modal-footer">
-	        		<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	    	    </div>
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="myModalLabel">Tournament Results</h4>
+				</div>
+				<div class="modal-body">
+					<img src="images/tournament.jpg" class="img-responsive" alt="chess match">
+					<h5 class="text-uppercase">Description</h5>
+					<p> A database schema to store the game matches between players and query this data to determine the order of matches</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
 			</div>
-	  	</div>
+		</div>
 	</div>
-	</body>
+</body>
+
 </html>
