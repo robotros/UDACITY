@@ -1,6 +1,6 @@
 import os
 import sys
-from sqlalchemy import Column, ForiegnKey, Integer, String, Date, Enum, Numberic
+from sqlalchemy import Column, ForeignKey, Integer, String, Date, Enum, Numberic
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -36,11 +36,11 @@ class Puppy(Base):
 	gender = Column(Enum(Gender), nullable = False)
 	weight = Column(Numberic(8))
 	picture = Column(String)
-	shelter_id = Column(Integer, ForiegnKey('shelter.id'))
+	shelter_id = Column(Integer, ForeignKey('shelter.id'))
 	shelter = relationship(Shelter)
 
 
 
 #####insert at end of file ####
 engine = create_engine('sqlite:///puppies.db')
-Bade.metadata.create_all(engine)
+Base.metadata.create_all(engine)
