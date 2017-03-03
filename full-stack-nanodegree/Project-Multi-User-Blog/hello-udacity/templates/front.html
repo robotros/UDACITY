@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+    {% block title %}
+        MyBlog
+    {% endblock %}
+    {% block content %}
+
+   	    {% for post in posts %}
+            <div class="row">
+                <div class="col-md-12">
+                    {{ post.render() | safe }}
+                </div>
+            </div>
+        {% endfor %}
+
+{% endblock %}
