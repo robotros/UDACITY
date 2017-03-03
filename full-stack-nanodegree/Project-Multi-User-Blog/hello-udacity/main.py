@@ -4,12 +4,12 @@ Python webserver code to manage a multi-user blog
 part of UDACITY Fullstack Nano-Degree
 
 Author: Aron Roberts
-Version: 0.7
+Version: 0.8
 Date Created: 3/1/2017
 filename: main.py
 
 Last Update:
-Date: 3/1/2017
+Date: 3/2/2017
 DESC: 
 
 """
@@ -47,6 +47,7 @@ def check_secure_val(h):
 	val = h.split('|')[0]
 	if h == make_secure_val(val):
 		return val
+
 def make_salt(n=5):
 	return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(n))
 
@@ -58,14 +59,13 @@ def valid_pw(name, pw, h):
 	if h == make_pw_hash(name, pw, salt):
 		return True
 
-
-
 # Entity Classes
 class Post(db.Model):
 	""" Entity class for post """
 	subject = db.StringProperty(required = True)
 	content = db.TextProperty(required = True)
 	created = db.DateTimeProperty(auto_now_add = True)
+	user = db.StringProperty()
 	last_modified = db.DateTimeProperty(auto_now = True)
 
 	def render(self):
@@ -81,6 +81,20 @@ class User(db.Model):
 	password = db.StringProperty(required = True)
 	email = db.StringProperty()
 
+	@classmethod
+	def by_id(cls, uid):
+		return cls.get_by_id(uid)
+
+	@classmethod
+	def by_username(cls, username):
+		u = cls.all().filter('username =', username).get()
+		return u
+
+	@classmethod
+	def login(cls, username, pw):
+		u = cls.by_username(username)
+		if u and valid_pw(username, pw, u.password):
+			return u 
 
 
 # Handler Classes
@@ -114,6 +128,12 @@ class Handler(webapp2.RequestHandler):
 	def logout(self):
 		self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
+	def initialize(self, *a, **kw):
+		webapp2.RequestHandler.initialize(self, *a, **kw)
+		uid = self.read_secure_cookie('user_id')
+		self.user = uid and User.by_id(int(uid))
+
+
 class BlogFront(Handler):
 	""" handler for front page of blog """
 	def get(self):
@@ -124,8 +144,7 @@ class BlogFront(Handler):
 class PostPage(Handler):
 	""" handler for individual post """
 	def get(self, post_id):
-		key = db.Key.from_path('Post', int(post_id))
-		post = db.get(key)
+		post = Post.get_by_id(int(post_id))
 
 		#error checking 
 		if not post:
@@ -146,15 +165,19 @@ class NewPost(Handler):
 	def post(self):
 		subject = self.request.get("subject")
 		content = self.request.get("content")
-
-		if subject and content :
-			a = Post(subject = subject, content = content)
-			a.put()
-			self.redirect('/blog/%s' % str(a.key().id()))
+		u = self.read_secure_cookie("user_id")
+		if u:
+			if subject and content:
+				a = Post(subject = subject, content = content, user = u)
+				a.put()
+				self.redirect('/blog/%s' % str(a.key().id()))
+			else:
+				errorMessage = "we need both subject and some content!"
+				error = "has-error has-feedback" 
+				self.render_new_post(subject, content, error, errorMessage)
 		else:
-			errorMessage = "we need both subject and some content!"
-			error = "has-error has-feedback" 
-			self.render_new_post(subject, content, error, errorMessage)
+			self.redirect('/blog/signup')
+
 class RegistrationPage(Handler):
 	""" Handler for signup page """
 	def render_signup(self, username="", first_name="", last_name="", password="", verify="", email="", error="", errorMessage=""):
@@ -174,9 +197,10 @@ class RegistrationPage(Handler):
 
 		if username and password and verify == password:
 				a = User(username = username, first_name = first_name,
-					last_name = last_name, password = make_pw_hash(password), 
+					last_name = last_name, password = make_pw_hash(username, password), 
 					email = email)
 				a.put()
+				self.login(a)
 				self.redirect('/blog/')
 		elif password != verify:
 			errorMessage = "Passwords did not match"
@@ -186,8 +210,26 @@ class RegistrationPage(Handler):
 			error ="has-error has-feedback"
 			self.render_signup(username,first_name, last_name, "", "", email , error, errorMessage)
 
+class Login(Handler):
+	def get(self):
+		self.render('login-form.html')
 
+	def post(self):
+		username = self.request.get('username')
+		password = self.request.get('password')
 
+		u = User.login(username, password)
+		if u:
+			self.login(u)
+			self.redirect('/blog')
+		else:
+			errorMessage = "invalid login"
+			self.render('login-form.html', errorMessage = errorMessage)
+
+class Logout(Handler):
+	def get(self):
+		self.logout();
+		self.redirect('/blog/signup')
 
 class MainPage(Handler):
 	""" Handler for main page of Blog """
@@ -211,6 +253,8 @@ app = webapp2.WSGIApplication([('/', MainPage),
 							('/blog/?', BlogFront),
 							('/blog/([0-9]+)', PostPage),
 							('/blog/newpost', NewPost),
-							('/blog/signup', RegistrationPage)
+							('/blog/signup', RegistrationPage),
+							('/blog/login', Login),
+							('/blog/logout', Logout)
 							], 
 							debug=True)
