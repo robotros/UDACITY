@@ -192,7 +192,7 @@ class Registration(Handler):
 		self.render_signup()
 
 	def post(self):
-		username = self.request.get("username")
+		username = self.request.get("username").lower()
 		first_name = self.request.get("first_name")
 		last_name = self.request.get("last_name")
 		password = self.request.get("password")
@@ -228,7 +228,7 @@ class Login(Handler):
 		self.render('login-form.html')
 
 	def post(self):
-		username = self.request.get('username')
+		username = self.request.get('username').lower()
 		password = self.request.get('password')
 
 		u = User.login(username, password)
