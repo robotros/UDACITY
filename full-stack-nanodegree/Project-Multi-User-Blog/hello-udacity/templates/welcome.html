@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}
+	Sign Up
+{% endblock %}
+
+{% block content %}
+	<h2>Welcome back {{name}}</h2>
+
+	{% for post in posts %}
+        <div class="row">
+        	<div class="col-md-12">
+            	{{ post.render() | safe }}
+            </div>
+         </div>
+    {% endfor %}
+{% endblock %}

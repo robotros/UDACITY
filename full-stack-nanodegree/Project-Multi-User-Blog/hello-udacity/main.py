@@ -4,12 +4,12 @@ Python webserver code to manage a multi-user blog
 part of UDACITY Fullstack Nano-Degree
 
 Author: Aron Roberts
-Version: 0.8
+Version: 0.92
 Date Created: 3/1/2017
 filename: main.py
 
 Last Update:
-Date: 3/2/2017
+Date: 3/3/2017
 DESC: 
 
 """
@@ -26,7 +26,6 @@ from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
-
 SECRET = "Arma virumque cano"
 
 def render_str(template, **params):
@@ -51,8 +50,21 @@ def check_secure_val(h):
 def make_salt(n=5):
 	return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(n))
 
-def make_pw_hash(name, pw, salt=make_salt()):
-	return hmac.new(salt+SECRET, name+pw, hashlib.sha256).hexdigest()+','+salt
+def make_pw_hash(name, pw, salt=""):
+	""" Make a storable hash of the password """
+	# check if salt param set
+	if not salt:
+		salt = make_salt()
+
+	# convert key and msg from unicdoe str to byte str
+	key = bytearray(salt+SECRET, 'utf-8')
+	msg = bytearray(name+pw, 'utf-8')
+
+	# create hash
+	h = hmac.new(key, msg, hashlib.sha256).hexdigest()
+
+	#return hmac.new(salt+SECRET, name+pw, hashlib.sha256).hexdigest()+','+salt
+	return "%s,%s" % (h, salt)
 
 def valid_pw(name, pw, h):
 	salt = h.split(',')[1]
@@ -72,6 +84,12 @@ class Post(db.Model):
 		""" render text for more practical html """
 		self._render_text = self.content.replace('\n', '<br>')
 		return render_str("post.html", p = self)
+
+	def get_author_name(self):
+		if self.user:
+			author_id = str(self.user)
+			u = User.get_by_id(int(author_id))
+			return ('%s %s' % (u.first_name, u.last_name))
 
 class User(db.Model):
 	""" Entinty class for user """
@@ -131,7 +149,7 @@ class Handler(webapp2.RequestHandler):
 	def initialize(self, *a, **kw):
 		webapp2.RequestHandler.initialize(self, *a, **kw)
 		uid = self.read_secure_cookie('user_id')
-		self.user = uid and User.by_id(int(uid))
+		self.user = uid and User.get_by_id(int(uid))
 
 
 class BlogFront(Handler):
@@ -160,31 +178,34 @@ class NewPost(Handler):
 		self.render("newpost.html", subject = subject, content = content, error = error, errorMessage = errorMessage)
 
 	def get(self):
-		self.render_new_post()
+		if self.user:
+			self.render_new_post()
+		else:
+			self.redirect("/blog/login")
 
 	def post(self):
 		subject = self.request.get("subject")
 		content = self.request.get("content")
-		u = self.read_secure_cookie("user_id")
-		if u:
-			if subject and content:
-				a = Post(subject = subject, content = content, user = u)
-				a.put()
-				self.redirect('/blog/%s' % str(a.key().id()))
-			else:
-				errorMessage = "we need both subject and some content!"
-				error = "has-error has-feedback" 
-				self.render_new_post(subject, content, error, errorMessage)
-		else:
-			self.redirect('/blog/signup')
 
-class RegistrationPage(Handler):
+		if subject and content:
+			a = Post(subject = subject, content = content, user = str(self.user.key().id()))
+			a.put()
+			self.redirect('/blog/%s' % str(a.key().id()))
+		else:
+			errorMessage = "we need both subject and some content!"
+			error = "has-error has-feedback" 
+			self.render_new_post(subject, content, error, errorMessage)
+
+class Registration(Handler):
 	""" Handler for signup page """
 	def render_signup(self, username="", first_name="", last_name="", password="", verify="", email="", error="", errorMessage=""):
 		self.render("signup.html", username = username, first_name = first_name, last_name = last_name, 
 			password = password, verify = verify, email = email, error=error, errorMessage=errorMessage)
 
 	def get(self):
+		if self.user:
+				self.redirect("/blog/welcome")
+
 		self.render_signup()
 
 	def post(self):
@@ -196,6 +217,11 @@ class RegistrationPage(Handler):
 		email = self.request.get("email")
 
 		if username and password and verify == password:
+			u = User.by_username(username)
+			if u:
+				errorMessage = "User Already Exsist"
+				self.render_signup(errorMessage=errorMessage)
+			else:
 				a = User(username = username, first_name = first_name,
 					last_name = last_name, password = make_pw_hash(username, password), 
 					email = email)
@@ -212,6 +238,9 @@ class RegistrationPage(Handler):
 
 class Login(Handler):
 	def get(self):
+		if self.user:
+			self.redirect("/blog/welcome")
+		
 		self.render('login-form.html')
 
 	def post(self):
@@ -230,6 +259,19 @@ class Logout(Handler):
 	def get(self):
 		self.logout();
 		self.redirect('/blog/signup')
+
+class Welcome(Handler):
+	def get(self):
+		if self.user:
+			name = self.user.first_name+" "+self.user.last_name
+			uid = str(self.user.key().id())
+			
+			p = Post.all().filter('user =', uid)
+
+			self.render("welcome.html", name = name, posts = p)
+		else:		
+			self.redirect("/blog/login")
+
 
 class MainPage(Handler):
 	""" Handler for main page of Blog """
@@ -253,8 +295,9 @@ app = webapp2.WSGIApplication([('/', MainPage),
 							('/blog/?', BlogFront),
 							('/blog/([0-9]+)', PostPage),
 							('/blog/newpost', NewPost),
-							('/blog/signup', RegistrationPage),
+							('/blog/signup', Registration),
 							('/blog/login', Login),
-							('/blog/logout', Logout)
+							('/blog/logout', Logout),
+							('/blog/welcome', Welcome)
 							], 
 							debug=True)

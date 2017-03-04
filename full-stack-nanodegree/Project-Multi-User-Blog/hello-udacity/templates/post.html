@@ -1,7 +1,7 @@
 <div class="blog-post">
 	<h2 class="blog-post-title">{{p.subject}}</h2>
 	<p class="blog-post-meta">
-		Author: {{p.user}} Created: {{p.created.strftime("%b %d, %y")}} Modified: {{p.last_modified.strftime("%b %d, %y")}}
+		Author: {{p.get_author_name()}} Created: {{p.created.strftime("%b %d, %y")}} Modified: {{p.last_modified.strftime("%b %d, %y")}}
 	</p>
 	<p>{{p._render_text | safe}}</p>
 </div>
