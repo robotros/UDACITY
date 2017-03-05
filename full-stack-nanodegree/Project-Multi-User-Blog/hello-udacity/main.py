@@ -263,7 +263,10 @@ class Welcome(Handler):
             for p in posts:
                 likes = likes + p.get_likes()
 
-            self.render("welcome.html", user=self.user, posts=posts, likes=likes)
+            self.render("welcome.html",
+                        user=self.user,
+                        posts=posts,
+                        likes=likes)
         else:
             self.redirect("/blog/login")
 
@@ -362,7 +365,10 @@ class UpdatePost(Handler):
 
         # verify logged in user is post author
         if self.user.username == post.author.username:
-            params = dict(user=self.user, post=post, subject=post.subject, content=post.content)
+            params = dict(user=self.user, 
+                          post=post,
+                          subject=post.subject,
+                          content=post.content)
             self.render("updatepost.html", **params)
         else:
             self.redirect_to_dashboard()
@@ -489,7 +495,8 @@ class MainPage(Handler):
         visits += 1
 
         new_cookie_val = make_secure_val(str(visits))
-        self.response.headers.add_header('Set-Cookie', 'visits=%s' % new_cookie_val)
+        self.response.headers.add_header('Set-Cookie',
+                                         'visits=%s' % new_cookie_val)
 
         self.write("You've been here %s times" % visits)
 
