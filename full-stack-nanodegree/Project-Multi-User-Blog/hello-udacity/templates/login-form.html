@@ -4,10 +4,12 @@
         Login
     {% endblock %}
     {% block content %}
+        <p class='error-msg'>{{error_msg}}</p>
     	<form method="post">
     		<div class="form-group">
     			<label for="username">Username</label>
-    			<input type="text" id="username" name="username" class="form-control" placeholder="Username"/>
+    			<input type="text" id="username" name="username" class="form-control" value="{{username}}"
+                placeholder="Username"/>
     		</div>
     		<div class="form-group">
     			<label for="pw">Password</label>

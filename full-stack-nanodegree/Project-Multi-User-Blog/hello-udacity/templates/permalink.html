@@ -5,5 +5,5 @@
 {% endblock %}
 
 {% block content %}
-	{{post.render() | safe}}
+	{{post.render(user = user) | safe}}
 {% endblock %}}

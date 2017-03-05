@@ -35,10 +35,10 @@ class Post(db.Model):
 		t = jinja_env.get_template(template)
 		return t.render(params)
 
-	def render(self):
+	def render(self, **params):
 		""" render text for more practical html """
 		self._render_text = self.content.replace('\n', '<br>')
-		return self.render_str("post.html", p = self)
+		return self.render_str("post.html", p = self, **params)
 
 	def get_author_name(self):
 		if self.author:

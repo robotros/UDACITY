@@ -21,6 +21,7 @@ import hashlib
 import hmac
 import random
 import string
+import re
 
 from google.appengine.ext import db
 from models.user import User
@@ -105,10 +106,12 @@ class Handler(webapp2.RequestHandler):
 		self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
 	def login_status(self):
+		""" checks user login status """
 		if self.user:
 			return True
 	
 	def redirect_to_dashboard(self):
+		""" redirects to welcome page """
 		self.redirect("/blog/welcome")
 
 	def initialize(self, *a, **kw):
@@ -120,17 +123,31 @@ class Handler(webapp2.RequestHandler):
 # Registration and Login | Logout Handlers
 class Registration(Handler):
 	""" Handler for signup page """
-	def render_signup(self, username="", first_name="", last_name="", password="", verify="", email="", error="", errorMessage=""):
-		self.render("signup.html", username = username, first_name = first_name, last_name = last_name, 
-			password = password, verify = verify, email = email, error=error, errorMessage=errorMessage)
+
+	def valid_username(self, username):
+		""" validate username """
+		user_re = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+		return username and user_re.match(username)
+
+	def valid_pw(self, pw):
+		""" validate password """
+		pass_re = re.compile(r"^.{3,20}$")
+		return pw and pass_re.match(pw)
+
+	def valid_email(self, email):
+		""" validate email """
+		email_re = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
+		return email and email_re.match(email)
 
 	def get(self):
 		if self.user:
 				self.redirect_to_dashboard()
 
-		self.render_signup()
+		self.render("signup.html")
 
 	def post(self):
+		error_flag = False
+		error = "has-error has-feedback"
 		username = self.request.get("username").lower()
 		first_name = self.request.get("first_name")
 		last_name = self.request.get("last_name")
@@ -138,25 +155,48 @@ class Registration(Handler):
 		verify = self.request.get("verify")
 		email = self.request.get("email").lower()
 
-		if username and password and verify == password:
-			u = User.by_username(username)
-			if u:
-				errorMessage = "User Already Exsist"
-				self.render_signup(errorMessage=errorMessage)
-			else:
-				a = User(username = username, first_name = first_name,
-					last_name = last_name, password = User.make_pw_hash(username, password), 
-					email = email)
-				a.put()
-				self.login(a)
-				self.redirect('/blog/')
+		params = dict(username = username, first_name = first_name, last_name = last_name, email = email)
+
+		#check username for errors
+		if not self.valid_username(username):
+			error_flag = True
+			params['error_user'] = error
+			params['error_user_msg'] = "Invalid username, username must be 3 - 20 characters in length"
+		elif User.by_username(username) :
+			error_flag = True
+			params['error_user'] = error
+			params['error_user_msg'] = "username already exsists"
+
+		#check password for errors
+		if not self.valid_pw(password):
+			error_flag = True
+			params['error_pw'] = error
+			params['error_pw_msg'] = "Invalid password, password must be 3 - 20 characters in length"
 		elif password != verify:
-			errorMessage = "Passwords did not match"
-			self.render_signup(username,first_name, last_name, "", "", email , error, errorMessage)
+			error_flag = True
+			params['error_pw'] = error
+			params['error_pw_msg'] = "Passwords did not match"
+
+		#check email for errors
+		if not self.valid_email(email):
+			error_flag = True
+			params['error_email'] = error
+			params['error_email_msg'] = "Invalid email"
+
+		if error_flag:
+			self.render('signup.html', **params)
 		else:
-			errorMessage = "please complete required fields"
-			error ="has-error has-feedback"
-			self.render_signup(username,first_name, last_name, "", "", email , error, errorMessage)
+			# create new user
+			u = User(username = username,
+				first_name = first_name,
+				last_name = last_name,
+				password = User.make_pw_hash(username, password),
+				email = email)
+			u.put()
+
+			#log new user in and redirect to welcom
+			self.login(u)
+			self.redirect('/blog/welcome')
 
 class Login(Handler):
 	""" Handler for login """
@@ -170,40 +210,40 @@ class Login(Handler):
 		username = self.request.get('username').lower()
 		password = self.request.get('password')
 
+		params = dict(username = username)
+
 		u = User.login(username, password)
 		if u:
 			self.login(u)
-			self.redirect('/blog')
+			self.redirect_to_dashboard()
 		else:
-			errorMessage = "invalid login"
-			self.render('login-form.html', errorMessage = errorMessage)
+			params['error_msg'] = "invalid login : username or password is incorrect"
+			self.render('login-form.html', **params)
 
 class Logout(Handler):
 	""" Handler for logout """
 	def get(self):
 		self.logout();
-		self.redirect('/blog/signup')
+		self.redirect('/blog/login-form.html')
 
 # Blog Handlers
 class BlogFront(Handler):
 	""" handler for front page of blog """
 	def get(self):
-
 		posts = Post.all().order('-created')
 		#posts = db.GqlQuery("SELECT * FROM Post ORDER BY created DESC limit 10 ")
-		self.render('front.html', posts = posts, logged_in = self.login_status())
+		self.render('front.html', posts = posts, user = self.user)
 
 class Welcome(Handler):
 	""" Handler for user dashboard """
 	def get(self):
-		if self.user:
-			name = self.user.first_name+" "+self.user.last_name			
+		if self.user:	
 			posts = self.user.posts
 			likes = 0
 			for p in posts:
 				likes = likes + p.get_likes()
 
-			self.render("welcome.html", logged_in = self.login_status(), name = name, posts = posts, likes = likes)
+			self.render("welcome.html", user = self.user, posts = posts, likes = likes)
 		else:		
 			self.redirect("/blog/login")
 
@@ -217,32 +257,42 @@ class PostPage(Handler):
 			self.error(404)
 			return
 
-		self.render("permalink.html", logged_in = self.login_status(), post = post)
+		self.render("permalink.html", user = self.user, post = post)
 
 class NewPost(Handler):
 	""" Handler for inputing new post """
-	def render_new_post(self, subject = "", content = "", error = "", errorMessage = ""):
-		""" renders new post page from template """
-		self.render("newpost.html",logged_in = self.login_status(), subject = subject, content = content, error = error, errorMessage = errorMessage)
-
 	def get(self):
 		if self.user:
-			self.render_new_post()
+			self.render("newpost.html", user=self.user)
 		else:
 			self.redirect("/blog/login")
 
 	def post(self):
+		if not self.user:
+			self.redirect("/blog/login")
+
 		subject = self.request.get("subject")
 		content = self.request.get("content")
 
-		if subject and content:
-			a = Post(subject = subject, content = content, author = self.user)
-			a.put()
-			self.redirect('/blog/%s' % str(a.key().id()))
+		params = dict(subject = subject, content = content, user = self.user)
+
+		error_flag = False
+		error = "has-error has-feedback"
+		if not subject:
+			error_flag = True
+			params['error_subj'] = error
+			params['error_subj_msg'] = "A subject is required"
+		if not content:
+			error_flag = True
+			params['error_con'] = error
+			params['error_con_msg'] = "Content is required"
+
+		if error_flag:
+			self.render("newpost.html", **params)
 		else:
-			errorMessage = "we need both subject and some content!"
-			error = "has-error has-feedback" 
-			self.render_new_post(subject, content, error, errorMessage)
+			p = Post(subject = subject, content = content, author = self.user)
+			p.put()
+			self.redirect('/blog/%s' % str(p.key().id()))
 
 class LikePost(Handler):
 	def post(self, post_id):
@@ -263,11 +313,48 @@ class LikePost(Handler):
 class UpdatePost(Handler):
 	def get(self, post_id):
 		if not self.user:
-			return
+			self.redirect("/blog/login")
+
+		post = Post.get_by_id(int(post_id))
+		if self.user.username == post.author.username:
+			params = dict(user = self.user, post = post, subject = post.subject, content = post.content)
+			self.render("updatepost.html", **params)
+		else:
+			self.redirect_to_dashboard()
 
 	def post(self, post_id):
 		if not self.user:
-			return
+			self.redirect("/blog/login")
+
+		post = Post.get_by_id(int(post_id))
+		if self.user.username != post.author.username:
+			self.redirect_to_dashboard()
+		else:
+			subject = self.request.get("subject")
+			content = self.request.get("content")
+
+		params = dict(subject = subject, content = content, user = self.user)
+		error_flag = False
+		error = "has-error has-feedback"
+
+		if not subject:
+			error_flag = True
+			params['error_subj'] = error
+			params['error_subj_msg'] = "A subject is required"
+
+		if not content:
+			error_flag = True
+			params['error_con'] = error
+			params['error_con_msg'] = "Content is required"
+
+		if error_flag:
+			self.render("newpost.html", **params)
+		else:
+			post.subject = subject
+			post.content = content
+			post.put()
+			self.redirect('/blog/%s' % str(post.key().id()))
+
 
 class DeletePost(Handler):
 	def post(self, post_id):
@@ -276,13 +363,9 @@ class DeletePost(Handler):
 			return
 
 		post = Post.get_by_id(int(post_id))
-		uid = str(self.user.key().id())
-
 		if post.author.username == self.user.username:
 			post.delete()
-			self.redirect('/blog/welcome')
-		else:
-			self.redirect('/blog/welcome')
+		self.redirect_to_dashboard()
 
 class NewComment(Handler):
     def get(self, post_id):
@@ -292,7 +375,7 @@ class NewComment(Handler):
         
         post = Post.get_by_id(int(post_id))
         
-        self.render("newcomment.html", logged_in = self.login_status(), post = post)
+        self.render("newcomment.html", user = self.user, post = post)
 
     def post(self, post_id):
         post = Post.get_by_id(int(post_id))
@@ -357,7 +440,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
 							('/blog/([0-9]+)/newcomment', NewComment),
 							('/blog/deletecomment/([0-9]+)', DeleteComment),
 							('/blog/([0-9]+)/deletepost', DeletePost),
-							('/blog/([0-9]+)/updatepost', UpdatePost),
+							('/blog/updatepost/([0-9]+)', UpdatePost),
 							('/blog/([0-9]+)/likepost', LikePost)
 							], 
 							debug=True)
