@@ -72,7 +72,7 @@ class Handler(webapp2.RequestHandler):
 	def hash_str(self, s):
 		""" Hash a string """
 		return hmac.new(SECRET, s, hashlib.sha256).hexdigest()
-
+		
 	def make_secure_val(self, s):
 		""" turn string to secure value """
 		return "%s|%s" % (s, self.hash_str(s))
@@ -178,7 +178,7 @@ class Registration(Handler):
 			params['error_pw_msg'] = "Passwords did not match"
 
 		#check email for errors
-		if not self.valid_email(email):
+		if email and not self.valid_email(email):
 			error_flag = True
 			params['error_email'] = error
 			params['error_email_msg'] = "Invalid email"
