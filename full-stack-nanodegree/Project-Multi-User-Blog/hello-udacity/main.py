@@ -114,7 +114,7 @@ class Handler(webapp2.RequestHandler):
         """ removes user_id cookie """
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
-    def check_user_login(self):
+    def verify_user_login(self):
         """ verify user is logged in """
         if not self.user:
             self.redirect("/blog/login")
@@ -239,7 +239,7 @@ class Logout(Handler):
     """ Handler for logout """
     def get(self):
         self.logout()
-        self.redirect('/blog/login-form.html')
+        self.redirect("/blog/login")
 
 
 # Blog Handlers
@@ -340,15 +340,16 @@ class LikePost(Handler):
 
         liked_by = post.liked_by
 
-        # get logged in users id
+        # get logged in users id and username
         uid = str(self.user.key().id())
+        username = self.user.username
 
         # check is user is post author or previously liked the post
-        if self.user.username != post.author.username and uid not in post.liked_by:
+        if username != post.author.username and uid not in post.liked_by:
             post.liked_by.append(uid)
             post.put()
-        else:
-            self.redirect('/blog/%s' % str(post_id))
+        
+        self.redirect('/blog/%s' % str(post_id))
 
 
 class UpdatePost(Handler):
@@ -365,7 +366,7 @@ class UpdatePost(Handler):
 
         # verify logged in user is post author
         if self.user.username == post.author.username:
-            params = dict(user=self.user, 
+            params = dict(user=self.user,
                           post=post,
                           subject=post.subject,
                           content=post.content)
@@ -432,8 +433,8 @@ class DeletePost(Handler):
         # verify logged in user is post author
         if post.author.username == self.user.username:
             post.delete()
-        else:
-            self.redirect_to_dashboard()
+
+        self.redirect_to_dashboard()
 
 
 class NewComment(Handler):
@@ -461,7 +462,7 @@ class NewComment(Handler):
         comment = self.request.get('comment')
 
         if comment:
-            c = Comment(comment=comment, post=post, user=self.user)
+            c = Comment(comment=comment, post=post, author=self.user)
             c.put()
             self.redirect('/blog/%s' % str(post_id))
         else:
@@ -469,11 +470,12 @@ class NewComment(Handler):
 
 
 class DeleteComment(Handler):
-    def get(self, comment_id):
+    def post(self, comment_id):
+        self.verify_user_login()
 
         comment = Comment.get_by_id(int(comment_id))
-        uid = str(self.user.key().id())
-        if comment and comment.user == uid:
+
+        if comment and comment.author.username == self.user.username:
             comment.delete()
             self.redirect('/blog/')
         else:
@@ -510,7 +512,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                               ('/blog/welcome', Welcome),
                               ('/blog/([0-9]+)/newcomment', NewComment),
                               ('/blog/deletecomment/([0-9]+)', DeleteComment),
-                              ('/blog/([0-9]+)/deletepost', DeletePost),
+                              ('/blog/deletepost/([0-9]+)', DeletePost),
                               ('/blog/updatepost/([0-9]+)', UpdatePost),
-                              ('/blog/([0-9]+)/likepost', LikePost)],
+                              ('/blog/likepost/([0-9]+)', LikePost)],
                               debug=True)

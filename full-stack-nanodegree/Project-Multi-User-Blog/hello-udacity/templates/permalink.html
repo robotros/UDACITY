@@ -6,4 +6,21 @@
 
 {% block content %}
 	{{post.render(user = user) | safe}}
+
+	Comments: 
+	{% for c in post.comments %}
+		<div class="row">
+			<div class="col-md-12 blog-post-comment">
+				<p>{{c.comment}}</p>
+				<p>-- {{c.author.username}}</p>
+			</div>
+		</div> 
+		{% if user.username == c.author.username %}
+			<form action="/blog/deletecomment/{{c.key().id()}}" method="post">
+				<button type="submit" class="btn btn-default">
+					<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete
+				</button>
+			</form>
+		{% endif %}
+	{% endfor %}
 {% endblock %}}

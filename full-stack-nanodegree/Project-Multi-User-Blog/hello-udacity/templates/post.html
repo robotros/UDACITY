@@ -4,24 +4,37 @@
 		Author: {{p.get_author_name()}} Created: {{p.created.strftime("%b %d, %y")}} Modified: {{p.last_modified.strftime("%b %d, %y")}} Likes: {{p.get_likes()}}
 	</p>
 	<p>{{p._render_text | safe}}</p>
-	<div class="row">
+	<div class="row blog-post-footer">
+		<div class="col-md-2">
+			<a href="/blog/{{p.key().id()}}" class="btn btn-default">
+				View
+			</a>
+		</div>
 		{% if user.username != p.author.username %}
-			<div class="col-md-1">
-				<form action="/blog/{{p.key().id()}}/likepost" method="post">
-					<button type="submit" class="btn btn-default">Like</button>
+			<div class="col-md-2">
+				<form action="/blog/likepost/{{p.key().id()}}" method="post">
+					<button type="submit" class="btn btn-default">
+						<span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Like
+					</button>
 				</form>
 			</div>
 		{% endif %}
-		<div class="col-md-1">
-			<a href="/blog/{{p.key().id()}}/newcomment" class="btn btn-default">Comment</a>
+		<div class="col-md-2">
+			<a href="/blog/{{p.key().id()}}/newcomment" class="btn btn-default">
+				<span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Comment
+			</a>
 		</div>
 		{% if user.username == p.author.username %}
-			<div class="col-md-1">
-				<a href="/blog/updatepost/{{p.key().id()}}" class="btn btn-default">Edit</a>
+			<div class="col-md-2">
+				<a href="/blog/updatepost/{{p.key().id()}}" class="btn btn-default">
+					<span class="glyphicon glyphicon-edit" aria-hidden="true"></span> Edit
+				</a>
 			</div>
-			<div class="col-md-1">
-				<form action="/blog/{{p.key().id()}}/deletepost" method="post">
-					<button type="submit" class="btn btn-default">Delete</button>
+			<div class="col-md-2">
+				<form action="/blog/deletepost/{{p.key().id()}}" method="post">
+					<button type="submit" class="btn btn-default">
+						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete
+					</button>
 				</form>
 			</div>
 		{% endif %}
