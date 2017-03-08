@@ -123,6 +123,13 @@ class Handler(webapp2.RequestHandler):
         """ redirects to welcome page """
         self.redirect("/blog/welcome")
 
+    def retrieve_post(self, post_id):
+        post = Post.get_by_id(int(post_id))
+        if not post:
+            self.error(404)
+        else:
+            return post
+
     def initialize(self, *a, **kw):
         """ verify login status using cookie """
         webapp2.RequestHandler.initialize(self, *a, **kw)
@@ -261,7 +268,7 @@ class Welcome(Handler):
 
             # calculate total likes for all posts
             for p in posts:
-                likes = likes + p.get_likes()
+                likes = likes + p.likes
 
             self.render("welcome.html",
                         user=self.user,
@@ -276,9 +283,8 @@ class PostPage(Handler):
     def get(self, post_id):
 
         # retrieve post
-        post = Post.get_by_id(int(post_id))
+        post = self.retrieve_post(post_id)
         if not post:
-            self.error(404)
             return
 
         self.render("permalink.html", user=self.user, post=post)
@@ -333,9 +339,8 @@ class LikePost(Handler):
         self.verify_user_login()
 
         # retrieve post
-        post = Post.get_by_id(int(post_id))
+        post = self.retrieve_post(post_id)
         if not post:
-            self.error(404)
             return
 
         liked_by = post.liked_by
@@ -348,7 +353,7 @@ class LikePost(Handler):
         if username != post.author.username and uid not in post.liked_by:
             post.liked_by.append(uid)
             post.put()
-        
+
         self.redirect('/blog/%s' % str(post_id))
 
 
@@ -359,9 +364,8 @@ class UpdatePost(Handler):
         self.verify_user_login()
 
         # retrieve post
-        post = Post.get_by_id(int(post_id))
+        post = self.retrieve_post(post_id)
         if not post:
-            self.error(404)
             return
 
         # verify logged in user is post author
@@ -379,9 +383,8 @@ class UpdatePost(Handler):
         self.verify_user_login()
 
         # retrieve post
-        post = Post.get_by_id(int(post_id))
+        post = self.retrieve_post(post_id)
         if not post:
-            self.error(404)
             return
 
         # verify logged in user is post author
@@ -425,9 +428,8 @@ class DeletePost(Handler):
         self.verify_user_login()
 
         # retrieve post
-        post = Post.get_by_id(int(post_id))
+        post = self.retrieve_post(post_id)
         if not post:
-            self.error(404)
             return
 
         # verify logged in user is post author
@@ -442,21 +444,19 @@ class NewComment(Handler):
         self.verify_user_login()
 
         # retrieve post
-        post = Post.get_by_id(int(post_id))
+        post = self.retrieve_post(post_id)
         if not post:
-            self.error(404)
             return
 
         self.render("newcomment.html", user=self.user, post=post)
 
     def post(self, post_id):
-        post = Post.get_by_id(int(post_id))
-
-        if not post:
-            self.error(404)
-            return
-
         self.verify_user_login()
+
+        # retrieve post
+        post = self.retrieve_post(post_id)
+        if not post:
+            return
 
         # create comment
         comment = self.request.get('comment')
@@ -490,13 +490,13 @@ class MainPage(Handler):
         visits = 0
         visit_cookie_str = self.request.cookies.get('visits', '0')
         if visit_cookie_str:
-                cookie_val = check_secure_val(visit_cookie_str)
+                cookie_val = self.check_secure_val(visit_cookie_str)
                 if cookie_val:
                     visits = int(cookie_val)
 
         visits += 1
 
-        new_cookie_val = make_secure_val(str(visits))
+        new_cookie_val = self.make_secure_val(str(visits))
         self.response.headers.add_header('Set-Cookie',
                                          'visits=%s' % new_cookie_val)
 

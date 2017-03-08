@@ -21,4 +21,4 @@ class Comment(db.Model):
                                 collection_name='comments')
     author = db.ReferenceProperty(User, required=True,
                                   collection_name='comments')
-    comment = db.StringProperty(required=True)
+    comment = db.TextProperty(required=True)

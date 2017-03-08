@@ -7,7 +7,7 @@ filename: post.py
 
 Last Update:
 Date: 3/5/2017
-DESC: PEP8 Requirements
+DESC: set author_name and likes as @property
 
 """
 
@@ -42,11 +42,13 @@ class Post(db.Model):
         self._render_text = self.content.replace('\n', '<br>')
         return self.render_str("post.html", p=self, **params)
 
-    def get_author_name(self):
+    @property
+    def author_name(self):
         if self.author:
             return ('%s %s' % (self.author.first_name, self.author.last_name))
 
-    def get_likes(self):
+    @property
+    def likes(self):
         if self.liked_by:
             return len(self.liked_by)
         else:
