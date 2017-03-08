@@ -32,3 +32,4 @@ run entertainment_test.py in Python
 
 1. *tested in latest verisions of FireFox, Chrome, and Edge
 2. Project Requirements can be found at [UDACITY.com](http://www.UDACITY.com/)
+3. Project was found to "Exceed Expectations" by Udacity Code Review

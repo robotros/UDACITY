@@ -60,4 +60,5 @@ The following will be required to run this program
 ### Footnotes
 
 * Project Requirements can be found at [UDACITY.com](http://www.UDACITY.com/)
-* Project can be found running at [Google Ap Enging](https://hello-world-158219.appspot.com/blog/)
+* Project can be found running at [Google Ap Engine](https://hello-world-158219.appspot.com/blog/)
+* Project was foung to "Meet Specifications" by Udacity Code Review

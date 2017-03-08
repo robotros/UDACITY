@@ -47,3 +47,4 @@ The following will be required to run this program
 	Instructions to use VM for dependecies can be found at [UDACITY](https://www.udacity.com/wiki/ud088/vagrant)
 * **Quickstart step 2 is already done when using included Vagrantfile and pg_config.sh
 * Project Requirements can be found at [UDACITY.com](http://www.UDACITY.com/)
+* Project was found to "Exceed Expectations" by Udacity code review
