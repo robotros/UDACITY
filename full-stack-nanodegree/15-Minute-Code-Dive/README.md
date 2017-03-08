@@ -19,8 +19,8 @@ The following will be required to run this program
 
 ### Quickstart
 
- Execute `python -m SimpleHTTPServer 8080`
- browse to http://localhost:8080/. 
+ * Execute `python -m SimpleHTTPServer 8080`
+ * browse to http://localhost:8080/. 
 
 
 
